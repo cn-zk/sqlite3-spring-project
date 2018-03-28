@@ -1,0 +1,73 @@
+package com.schrodinger.action;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.schrodinger.basic.BasicAction;
+import com.schrodinger.service.SrAccountService;
+import com.schrodinger.utils.SrUtils;
+
+import net.sf.json.JSONObject;
+
+@Controller
+@RequestMapping("account")
+public class SrAccountAction extends BasicAction{
+
+	@Autowired
+	SrAccountService service;
+	
+	@RequestMapping("/list")
+	public void list(HttpServletRequest request, HttpServletResponse response){
+		try {
+			this.print(response, service.queryAccountList(super.getParameterMap(request)));
+		} catch (Exception e) {
+			SrUtils.printStackTrace(e);
+		}
+	}
+	
+	@RequestMapping("/find")
+	public void find(HttpServletRequest request, HttpServletResponse response){
+		try {
+			this.print(response, service.findAccount(request.getParameter("id")));
+		} catch (Exception e) {
+			SrUtils.printStackTrace(e);
+		}
+	}
+	
+	@RequestMapping("/save")
+	public void save(HttpServletRequest request, HttpServletResponse response){
+		try {
+			JSONObject obj = new JSONObject();
+			try {
+				obj.put("result", service.insertOrUpdate(request.getParameter("dtos"), "sys_account"));
+				obj.put("flag", "success");
+			} catch (Exception e) {
+				SrUtils.printStackTrace(e);
+				obj.put("flag", "error");
+				obj.put("error", e.getMessage());
+			}
+			this.print(response, obj);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			SrUtils.printStackTrace(e);
+		}
+	}
+	
+	@RequestMapping("/dels")
+	public void userDelete(HttpServletRequest request, HttpServletResponse response) {
+		JSONObject obj = new JSONObject();
+		try {
+			obj.put("result", service.delete(request.getParameter("ids"), "sys_account"));
+			obj.put("flag", "success");
+		} catch (Exception e) {
+			SrUtils.printStackTrace(e);
+			obj.put("flag", "error");
+			obj.put("error", e.getMessage());
+		}
+		write(response, obj);
+	}
+}
